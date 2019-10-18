@@ -11,7 +11,6 @@
 #import <dlfcn.h>
 #import <objc/runtime.h>
 #import "XCDUndocumentedChecker.h"
-#import "XcodeVersionCompatibility.h"
 
 static NSString * const FrameworksToLoad = @"FrameworksToLoad";
 
@@ -20,18 +19,9 @@ static NSString * const FrameworksToLoad = @"FrameworksToLoad";
 	id<PBXProject> _project;
 }
 
-static Class PBXGroup = Nil;
 static Class PBXProject = Nil;
-static Class PBXReference = Nil;
-static Class XCBuildConfiguration = Nil;
-static Class IDEBuildParameters = Nil;
 
-+ (void) setPBXGroup:(Class)class                  { PBXGroup = class; }
 + (void) setPBXProject:(Class)class                { PBXProject = class; }
-+ (void) setPBXReference:(Class)class              { PBXReference = class; }
-+ (void) setXCBuildConfiguration:(Class)class      { XCBuildConfiguration = class; }
-+ (void) setIDEBuildParameters:(Class)class        { IDEBuildParameters = class; }
-+ (void) setValue:(id)value forUndefinedKey:(NSString *)key { /* ignore */ }
 
 static NSString *XcodeBundleIdentifier = @"com.apple.dt.Xcode";
 
@@ -193,13 +183,18 @@ static void InitializeXcodeFrameworks(void)
 	if (initialized)
 		return;
 	
-	NSUserDefaults *standardUserDefaults = [NSUserDefaults standardUserDefaults];
+	NSArray *frameworksToLoad = @[
+		@"IDEFoundation.framework",
+		@"Xcode3Core.ideplugin",
+		@"IBAutolayoutFoundation.framework",
+		@"IDEKit.framework",
+		@"DebugHierarchyFoundation.framework",
+		@"DebugHierarchyKit.framework",
+		
+//		@"DevToolsCore.framework"
+	];
 	
-	NSArray *frameworksToLoad = @[ @"IDEFoundation.framework", @"Xcode3Core.ideplugin", @"IBAutolayoutFoundation.framework" ];
-	[standardUserDefaults registerDefaults:@{ FrameworksToLoad: frameworksToLoad }];
-	
-	LoadXcodeFrameworks(XcodeBundle(), [standardUserDefaults objectForKey:FrameworksToLoad]);
-	InitializeXcodeVersionCompatibility();
+	LoadXcodeFrameworks(XcodeBundle(), frameworksToLoad);
 	InitializeXcodeFrameworks();
 	
 	BOOL isSafe = YES;
