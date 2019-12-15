@@ -452,30 +452,6 @@ static void WorkaroundRadar18512876(void)
 	return [[_project targets] count] > 0 ? @(EX_OK) : @(EX_SOFTWARE);
 }
 
-- (NSNumber *) listHeaders:(NSArray *)arguments
-{
-	if ([arguments count] > 1)
-		[self printUsage:EX_USAGE];
-	
-	NSString *headerRole = @"Public";
-	if ([arguments count] == 1)
-		headerRole = [[arguments objectAtIndex:0] capitalizedString];
-	
-	NSArray *allowedValues = @[ @"All", @"Public", @"Project", @"Private" ];
-	if (![allowedValues containsObject:headerRole])
-		@throw [DDCliParseException parseExceptionWithReason:[NSString stringWithFormat:@"list-headers argument must be one of {%@}.", [allowedValues componentsJoinedByString:@", "]] exitCode:EX_USAGE];
-	
-	id<PBXBuildPhase> headerBuildPhase = [_target defaultHeaderBuildPhase];
-	for (id<PBXBuildFile> buildFile in [headerBuildPhase buildFiles])
-	{
-		NSArray *attributes = [buildFile attributes];
-		if ([attributes containsObject:headerRole] || [headerRole isEqualToString:@"All"])
-			ddprintf(@"%@\n", [buildFile absolutePath]);
-	}
-	
-	return @(EX_OK);
-}
-
 - (NSNumber *) readBuildSetting:(NSArray *)arguments
 {
 	if ([arguments count] != 1)
