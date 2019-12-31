@@ -221,11 +221,16 @@ static void WorkaroundRadar18512876(void)
 	
 	NSArray *frameworksToLoad = @[ @"IDEFoundation.framework", @"Xcode3Core.ideplugin", @"IBAutolayoutFoundation.framework" ];
 	[standardUserDefaults registerDefaults:@{ FrameworksToLoad: frameworksToLoad }];
+	NSLog(@"started: %@", [NSDate date]);
 	
 	LoadXcodeFrameworks(XcodeBundle(), [standardUserDefaults objectForKey:FrameworksToLoad]);
+	NSLog(@"loaded frameworks: %@", [NSDate date]);
 	InitializeXcodeVersionCompatibility();
+	NSLog(@"initialized version compat: %@", [NSDate date]);
 	InitializeXcodeFrameworks();
+	NSLog(@"initialized frameworks: %@", [NSDate date]);
 	WorkaroundRadar18512876();
+	NSLog(@"workarounded: %@", [NSDate date]);
 	
 	BOOL isSafe = YES;
 	NSArray *protocols = @[@protocol(PBXBuildFile),
@@ -252,6 +257,7 @@ static void WorkaroundRadar18512876(void)
 			ddfprintf(stderr, @"%@\n%@\n", [classError localizedDescription], [classError userInfo]);
 		}
 	}
+	NSLog(@"protocols: %@", [NSDate date]);
 	
 	if (!isSafe)
 		exit(EX_SOFTWARE);
@@ -560,7 +566,10 @@ static void WorkaroundRadar18512876(void)
 
 - (NSNumber *) touch:(NSArray *)arguments
 {
-	return [self writeProject];
+	NSLog(@"before write: %@", [NSDate date]);
+	id res = [self writeProject];
+	NSLog(@"after write: %@", [NSDate date]);
+	return res;
 }
 
 /*
