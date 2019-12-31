@@ -182,6 +182,7 @@ static void InitializeXcodeFrameworks(void)
 	static BOOL initialized = NO;
 	if (initialized)
 		return;
+	NSLog(@"started: %@", [NSDate date]);
 	
 	NSArray *frameworksToLoad = @[
 		@"IDEFoundation.framework",
@@ -195,7 +196,9 @@ static void InitializeXcodeFrameworks(void)
 	];
 	
 	LoadXcodeFrameworks(XcodeBundle(), frameworksToLoad);
+	NSLog(@"loaded frameworks: %@", [NSDate date]);
 	InitializeXcodeFrameworks();
+	NSLog(@"initialized frameworks: %@", [NSDate date]);
 	
 	BOOL isSafe = YES;
 	NSArray *protocols = @[@protocol(PBXProject)];
@@ -212,6 +215,7 @@ static void InitializeXcodeFrameworks(void)
 			ddfprintf(stderr, @"%@\n%@\n", [classError localizedDescription], [classError userInfo]);
 		}
 	}
+	NSLog(@"protocols: %@", [NSDate date]);
 	
 	if (!isSafe)
 		exit(EX_SOFTWARE);
@@ -376,7 +380,10 @@ static void InitializeXcodeFrameworks(void)
 
 - (NSNumber *) touch:(NSArray *)arguments
 {
-	return [self writeProject];
+	NSLog(@"before write: %@", [NSDate date]);
+	id res = [self writeProject];
+	NSLog(@"after write: %@", [NSDate date]);
+	return res;
 }
 
 @end
