@@ -63,6 +63,11 @@ static Class PBXProject = Nil;
 	id<PBXPListUnarchiver> arch = [[NSClassFromString(@"PBXPListUnarchiver") alloc] initWithPListArchive:obj userSettings:nil contextInfo:contextInfo];
 	id project = [arch decodeRootObject];
 
+	id archiver = [[NSClassFromString(@"PBXPListArchiver") alloc] initWithRootObject:project delegate:project];
+	NSData *data2 = [[archiver plistArchive] plistDescriptionUTF8Data];
+	NSParameterAssert(data2);
+	NSParameterAssert([data2 writeToFile:projectName options:0 error:nil]);
+
 	[PBXProject removeContainerForResolvedAbsolutePath:url];
 
 	return project;
@@ -104,28 +109,7 @@ static Class PBXProject = Nil;
 		return EX_USAGE;
 	}
 
-	for (id<PBXProject> project in projects) {
-		int ret = [[self writeProject:project] intValue];
-		NSLog(@"written project");
-		if (ret != EX_OK) {
-			return ret;
-		}
-	}
-
 	return EX_OK;
-}
-
-// MARK: - Actions
-
-- (NSNumber *)writeProject:(id<PBXProject>)project
-{
-	BOOL written = [project writeToFileSystemProjectFile:YES userFile:NO checkNeedsRevert:NO];
-	if (!written)
-	{
-		ddfprintf(stderr, @"Could not write '%@' to file system.", project);
-		return @(EX_IOERR);
-	}
-	return @(EX_OK);
 }
 
 @end
