@@ -53,19 +53,7 @@ static Class PBXProject = Nil;
 
 // MARK: - Options
 
-- (void) application:(DDCliApplication *)app willParseOptions:(DDGetoptLongParser *)optionsParser
-{
-	DDGetoptOption optionTable[] = 
-	{
-		// Long           Short  Argument options
-		{"project",       'p',   DDGetoptRequiredArgument},
-		{"target",        't',   DDGetoptRequiredArgument},
-		{"configuration", 'c',   DDGetoptRequiredArgument},
-		{"help",          'h',   DDGetoptNoArgument},
-		{"version",       'V',   DDGetoptNoArgument},
-		{nil,           0,    0},
-	};
-	[optionsParser addOptionsFromTable:optionTable];
+- (void) application:(DDCliApplication *)app willParseOptions:(DDGetoptLongParser *)optionsParser {
 }
 
 - (id <PBXProject>) setProject:(NSString *)projectName
