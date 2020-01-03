@@ -260,31 +260,46 @@ static void InitializeXcodeFrameworks(void)
 - (int) application:(DDCliApplication *)app runWithArguments:(NSArray *)arguments
 {
 	[self.class initializeXcproj];
-	
+
+	NSMutableArray<id<PBXProject>> *projects = [@[] mutableCopy];
+
+	for (NSString *path in arguments) {
+		[projects addObject:[self setProject:path]];
+	}
+
 	NSString *currentDirectoryPath = [[NSFileManager defaultManager] currentDirectoryPath];
-	id<PBXProject> project = nil;
-	for (NSString *fileName in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:currentDirectoryPath error:NULL]) {
-		if ([PBXProject isProjectWrapperExtension:[fileName pathExtension]])
-		{
-			if (!project)
-				project = [self setProject:fileName];
-			else
+
+	if ([projects count] == 0) {
+		for (NSString *fileName in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:currentDirectoryPath error:NULL]) {
+			if ([PBXProject isProjectWrapperExtension:[fileName pathExtension]])
 			{
-				ddfprintf(stderr, @"%@: The directory %@ contains more than one Xcode project. You will need to specify the project with the --project option.\n", app, currentDirectoryPath);
-				return EX_USAGE;
+				if ([projects count] == 0) {
+					[projects addObject:[self setProject:fileName]];
+				} else {
+					ddfprintf(stderr, @"%@: The directory %@ contains more than one Xcode project. You will need to specify the project with the --project option.\n", app, currentDirectoryPath);
+					return EX_USAGE;
+				}
 			}
 		}
 	}
 
-	NSLog(@"project loaded");
+	NSLog(@"projects loaded");
 	
-	if (!project)
+	if ([projects count] == 0)
 	{
 		ddfprintf(stderr, @"%@: The directory %@ does not contain an Xcode project.\n", app, currentDirectoryPath);
 		return EX_USAGE;
 	}
 
-	return [[self writeProject:project] intValue];
+	for (id<PBXProject> project in projects) {
+		int ret = [[self writeProject:project] intValue];
+		NSLog(@"written project");
+		if (ret != EX_OK) {
+			return ret;
+		}
+	}
+
+	return EX_OK;
 }
 
 // MARK: - Actions
