@@ -15,9 +15,6 @@
 static NSString * const FrameworksToLoad = @"FrameworksToLoad";
 
 @implementation Xcproj
-{
-	id<PBXProject> _project;
-}
 
 static Class PBXProject = Nil;
 
@@ -236,7 +233,7 @@ static void InitializeXcodeFrameworks(void)
 	[optionsParser addOptionsFromTable:optionTable];
 }
 
-- (void) setProject:(NSString *)projectName
+- (id <PBXProject>) setProject:(NSString *)projectName
 {
 	[self.class initializeXcproj];
 	
@@ -250,10 +247,12 @@ static void InitializeXcodeFrameworks(void)
 	if (![[NSFileManager defaultManager] fileExistsAtPath:projectPath])
 		@throw [DDCliParseException parseExceptionWithReason:[NSString stringWithFormat:@"The project %@ does not exist in this directory.", projectName] exitCode:EX_NOINPUT];
 	
-	_project = [PBXProject projectWithFile:projectPath];
+	id<PBXProject> project = [PBXProject projectWithFile:projectPath];
 	
-	if (!_project)
+	if (!project)
 		@throw [DDCliParseException parseExceptionWithReason:[NSString stringWithFormat:@"The '%@' project is corrupted.", projectName] exitCode:EX_DATAERR];
+
+	return project;
 }
 
 // MARK: - App run
@@ -263,43 +262,39 @@ static void InitializeXcodeFrameworks(void)
 	[self.class initializeXcproj];
 	
 	NSString *currentDirectoryPath = [[NSFileManager defaultManager] currentDirectoryPath];
-	
-	if (!_project)
-	{
-		for (NSString *fileName in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:currentDirectoryPath error:NULL])
+	id<PBXProject> project = nil;
+	for (NSString *fileName in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:currentDirectoryPath error:NULL]) {
+		if ([PBXProject isProjectWrapperExtension:[fileName pathExtension]])
 		{
-			if ([PBXProject isProjectWrapperExtension:[fileName pathExtension]])
+			if (!project)
+				project = [self setProject:fileName];
+			else
 			{
-				if (!_project)
-					[self setProject:fileName];
-				else
-				{
-					ddfprintf(stderr, @"%@: The directory %@ contains more than one Xcode project. You will need to specify the project with the --project option.\n", app, currentDirectoryPath);
-					return EX_USAGE;
-				}
+				ddfprintf(stderr, @"%@: The directory %@ contains more than one Xcode project. You will need to specify the project with the --project option.\n", app, currentDirectoryPath);
+				return EX_USAGE;
 			}
 		}
 	}
 
 	NSLog(@"project loaded");
 	
-	if (!_project)
+	if (!project)
 	{
 		ddfprintf(stderr, @"%@: The directory %@ does not contain an Xcode project.\n", app, currentDirectoryPath);
 		return EX_USAGE;
 	}
 
-	return [[self writeProject] intValue];
+	return [[self writeProject:project] intValue];
 }
 
 // MARK: - Actions
 
-- (NSNumber *) writeProject
+- (NSNumber *)writeProject:(id<PBXProject>)project
 {
-	BOOL written = [_project writeToFileSystemProjectFile:YES userFile:NO checkNeedsRevert:NO];
+	BOOL written = [project writeToFileSystemProjectFile:YES userFile:NO checkNeedsRevert:NO];
 	if (!written)
 	{
-		ddfprintf(stderr, @"Could not write '%@' to file system.", _project);
+		ddfprintf(stderr, @"Could not write '%@' to file system.", project);
 		return @(EX_IOERR);
 	}
 	return @(EX_OK);
