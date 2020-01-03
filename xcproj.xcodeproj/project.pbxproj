@@ -17,7 +17,6 @@
 		C269E99117B3DCCC0099A0C5 /* DDGetoptLongParser.m in Sources */ = {isa = PBXBuildFile; fileRef = C269E98C17B3DCCC0099A0C5 /* DDGetoptLongParser.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		C2CDDAD819E1D89E00DD1CBA /* AppKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C2CDDAD719E1D89E00DD1CBA /* AppKit.framework */; };
 		DA1DC01010E59AED005A103B /* Xcproj.m in Sources */ = {isa = PBXBuildFile; fileRef = DA1DC00E10E59AED005A103B /* Xcproj.m */; };
-		DAFF25CC1303ECB100584E0E /* XCDUndocumentedChecker.m in Sources */ = {isa = PBXBuildFile; fileRef = DAFF25CB1303ECB100584E0E /* XCDUndocumentedChecker.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -52,8 +51,6 @@
 		DA1DC00E10E59AED005A103B /* Xcproj.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = Xcproj.m; path = Sources/Xcproj.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		DA1DC00F10E59AED005A103B /* Xcproj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Xcproj.h; path = Sources/Xcproj.h; sourceTree = "<group>"; };
 		DA8C9FFD1302AF93008B3560 /* PBXProject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PBXProject.h; sourceTree = "<group>"; };
-		DAFF25CA1303ECB100584E0E /* XCDUndocumentedChecker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; lineEnding = 0; name = XCDUndocumentedChecker.h; path = Sources/XCDUndocumentedChecker.h; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objcpp; };
-		DAFF25CB1303ECB100584E0E /* XCDUndocumentedChecker.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = XCDUndocumentedChecker.m; path = Sources/XCDUndocumentedChecker.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		DAFF2AD913055EF500584E0E /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -99,8 +96,6 @@
 				08FB7796FE84155DC02AAC07 /* main.m */,
 				DA1DC00F10E59AED005A103B /* Xcproj.h */,
 				DA1DC00E10E59AED005A103B /* Xcproj.m */,
-				DAFF25CA1303ECB100584E0E /* XCDUndocumentedChecker.h */,
-				DAFF25CB1303ECB100584E0E /* XCDUndocumentedChecker.m */,
 			);
 			name = Sources;
 			sourceTree = "<group>";
@@ -276,7 +271,6 @@
 				C269E98E17B3DCCC0099A0C5 /* DDCliApplication.m in Sources */,
 				C269E99017B3DCCC0099A0C5 /* DDCliUtil.m in Sources */,
 				C269E99117B3DCCC0099A0C5 /* DDGetoptLongParser.m in Sources */,
-				DAFF25CC1303ECB100584E0E /* XCDUndocumentedChecker.m in Sources */,
 				C269E98F17B3DCCC0099A0C5 /* DDCliParseException.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

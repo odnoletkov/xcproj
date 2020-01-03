@@ -10,7 +10,6 @@
 
 #import <dlfcn.h>
 #import <objc/runtime.h>
-#import "XCDUndocumentedChecker.h"
 
 @implementation Xcproj
 
@@ -38,7 +37,7 @@ static Class PBXProject = Nil;
 	for (Protocol *protocol in protocols)
 	{
 		NSError *classError = nil;
-		Class class = XCDClassFromProtocol(protocol, &classError);
+		Class class = NSClassFromString(@(protocol_getName(protocol)));
 		if (class)
 			[self setValue:class forKey:@(protocol_getName(protocol))];
 		else
