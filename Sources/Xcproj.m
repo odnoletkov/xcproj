@@ -18,31 +18,6 @@ static Class PBXProject = Nil;
 
 + (void) setPBXProject:(Class)class                { PBXProject = class; }
 
-static void InitializeXcodeFrameworks(void)
-{
-	BOOL(*IDEInitialize)(int initializationOptions, NSError **error) = dlsym(RTLD_DEFAULT, "IDEInitialize");
-	if (!IDEInitialize)
-	{
-		ddfprintf(stderr, @"IDEInitialize function not found.\n");
-		exit(EX_SOFTWARE);
-	}
-	
-	// Temporary redirect stderr to /dev/null in order not to print plugin loading errors
-	// Adapted from http://stackoverflow.com/questions/4832603/how-could-i-temporary-redirect-stdout-to-a-file-in-a-c-program/4832902#4832902
-	fflush(stderr);
-	int saved_stderr = dup(STDERR_FILENO);
-	int dev_null = open("/dev/null", O_WRONLY);
-	dup2(dev_null, STDERR_FILENO);
-	close(dev_null);
-	// Xcode3Core.ideplugin`-[Xcode3CommandLineBuildTool run] calls IDEInitialize(1, &error)
-	NSError *error;
-	BOOL initialized = IDEInitialize(1, &error);
-	NSCParameterAssert(initialized);
-	fflush(stderr);
-	dup2(saved_stderr, STDERR_FILENO);
-	close(saved_stderr);
-}
-
 + (void) initializeXcproj
 {
 	NSLog(@"started");
@@ -52,7 +27,9 @@ static void InitializeXcodeFrameworks(void)
 
 	NSLog(@"loaded frameworks");
 
-	InitializeXcodeFrameworks();
+	BOOL(*IDEInitialize)(int initializationOptions, NSError **error) = dlsym(RTLD_DEFAULT, "IDEInitialize");
+	NSCParameterAssert(IDEInitialize(1, nil));
+
 	NSLog(@"initialized frameworks");
 	
 	BOOL isSafe = YES;
