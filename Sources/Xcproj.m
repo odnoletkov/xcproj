@@ -94,22 +94,46 @@ static void InitializeXcodeFrameworks(void)
 
 - (id <PBXProject>) setProject:(NSString *)projectName
 {
-	[self.class initializeXcproj];
-	
-	if (![PBXProject isProjectWrapperExtension:[projectName pathExtension]])
-		@throw [DDCliParseException parseExceptionWithReason:[NSString stringWithFormat:@"The project name %@ does not have a valid extension.", projectName] exitCode:EX_USAGE];
-	
-	NSString *projectPath = projectName;
-	if (![projectName isAbsolutePath])
-		projectPath = [[[NSFileManager defaultManager] currentDirectoryPath] stringByAppendingPathComponent:projectName];
-	
-	if (![[NSFileManager defaultManager] fileExistsAtPath:projectPath])
-		@throw [DDCliParseException parseExceptionWithReason:[NSString stringWithFormat:@"The project %@ does not exist in this directory.", projectName] exitCode:EX_NOINPUT];
-	
-	id<PBXProject> project = [PBXProject projectWithFile:projectPath];
-	
-	if (!project)
-		@throw [DDCliParseException parseExceptionWithReason:[NSString stringWithFormat:@"The '%@' project is corrupted.", projectName] exitCode:EX_DATAERR];
+//	if (![PBXProject isProjectWrapperExtension:[projectName pathExtension]])
+//		@throw [DDCliParseException parseExceptionWithReason:[NSString stringWithFormat:@"The project name %@ does not have a valid extension.", projectName] exitCode:EX_USAGE];
+//
+//	NSString *projectPath = projectName;
+//	if (![projectName isAbsolutePath])
+//		projectPath = [[[NSFileManager defaultManager] currentDirectoryPath] stringByAppendingPathComponent:projectName];
+//
+//	if (![[NSFileManager defaultManager] fileExistsAtPath:projectPath])
+//		@throw [DDCliParseException parseExceptionWithReason:[NSString stringWithFormat:@"The project %@ does not exist in this directory.", projectName] exitCode:EX_NOINPUT];
+//
+//	id<PBXProject> project = [PBXProject projectWithFile:projectPath];
+//
+//	if (!project)
+//		@throw [DDCliParseException parseExceptionWithReason:[NSString stringWithFormat:@"The '%@' project is corrupted.", projectName] exitCode:EX_DATAERR];
+
+	if (![projectName.lastPathComponent isEqualToString:@"project.pbxproj"]) {
+		projectName = [projectName stringByAppendingPathComponent:@"project.pbxproj"];
+	}
+
+	NSLog(@"%@", projectName);
+	NSData *data = [NSData dataWithContentsOfFile:projectName];
+	NSError *error = nil;
+//	id obj = [NSPropertyListSerialization propertyListWithData:data options:0 format:nil error:&error];
+	id obj = [NSDictionary plistWithDescriptionData:data error:&error];
+	if (obj == nil && error) {
+		NSLog(@"%@", error);
+	}
+
+	id test = [projectName.pathComponents mutableCopy];
+	id url = [NSURL fileURLWithPathComponents:test].URLByDeletingLastPathComponent.absoluteURL.path;
+
+	id contextInfo = @{
+		@"path": url,
+		@"read-only": @0,
+		@"upgrade-log": [NSClassFromString(@"PBXLogOutputString") new],
+	};
+	id<PBXPListUnarchiver> arch = [[NSClassFromString(@"PBXPListUnarchiver") alloc] initWithPListArchive:obj userSettings:nil contextInfo:contextInfo];
+	id project = [arch decodeRootObject];
+
+	[PBXProject removeContainerForResolvedAbsolutePath:url];
 
 	return project;
 }
@@ -130,7 +154,7 @@ static void InitializeXcodeFrameworks(void)
 
 	if ([projects count] == 0) {
 		for (NSString *fileName in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:currentDirectoryPath error:NULL]) {
-			if ([PBXProject isProjectWrapperExtension:[fileName pathExtension]])
+			if ([[fileName pathExtension] isEqualToString:@"xcodeproj"])
 			{
 				if ([projects count] == 0) {
 					[projects addObject:[self setProject:fileName]];
