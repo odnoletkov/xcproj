@@ -30,25 +30,6 @@ static Class PBXProject = Nil;
 	NSCParameterAssert(IDEInitialize(1, nil));
 
 	NSLog(@"initialized frameworks");
-	
-	BOOL isSafe = YES;
-	NSArray *protocols = @[@protocol(PBXProject)];
-	
-	for (Protocol *protocol in protocols)
-	{
-		NSError *classError = nil;
-		Class class = NSClassFromString(@(protocol_getName(protocol)));
-		if (class)
-			[self setValue:class forKey:@(protocol_getName(protocol))];
-		else
-		{
-			isSafe = NO;
-			ddfprintf(stderr, @"%@\n%@\n", [classError localizedDescription], [classError userInfo]);
-		}
-	}
-
-	if (!isSafe)
-		exit(EX_SOFTWARE);
 }
 
 // MARK: - Options
@@ -58,21 +39,6 @@ static Class PBXProject = Nil;
 
 - (id <PBXProject>) setProject:(NSString *)projectName
 {
-//	if (![PBXProject isProjectWrapperExtension:[projectName pathExtension]])
-//		@throw [DDCliParseException parseExceptionWithReason:[NSString stringWithFormat:@"The project name %@ does not have a valid extension.", projectName] exitCode:EX_USAGE];
-//
-//	NSString *projectPath = projectName;
-//	if (![projectName isAbsolutePath])
-//		projectPath = [[[NSFileManager defaultManager] currentDirectoryPath] stringByAppendingPathComponent:projectName];
-//
-//	if (![[NSFileManager defaultManager] fileExistsAtPath:projectPath])
-//		@throw [DDCliParseException parseExceptionWithReason:[NSString stringWithFormat:@"The project %@ does not exist in this directory.", projectName] exitCode:EX_NOINPUT];
-//
-//	id<PBXProject> project = [PBXProject projectWithFile:projectPath];
-//
-//	if (!project)
-//		@throw [DDCliParseException parseExceptionWithReason:[NSString stringWithFormat:@"The '%@' project is corrupted.", projectName] exitCode:EX_DATAERR];
-
 	if (![projectName.lastPathComponent isEqualToString:@"project.pbxproj"]) {
 		projectName = [projectName stringByAppendingPathComponent:@"project.pbxproj"];
 	}
