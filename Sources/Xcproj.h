@@ -8,7 +8,7 @@
 
 #import "DDCommandLineInterface.h"
 
-#import <DevToolsCore/DevToolsCore.h>
+#import "PBXProject.h"
 
 @interface Xcproj : NSObject <DDCliApplicationDelegate>
 

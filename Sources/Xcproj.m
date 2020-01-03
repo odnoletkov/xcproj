@@ -182,23 +182,20 @@ static void InitializeXcodeFrameworks(void)
 	static BOOL initialized = NO;
 	if (initialized)
 		return;
-	NSLog(@"started: %@", [NSDate date]);
+	NSLog(@"started");
 	
 	NSArray *frameworksToLoad = @[
 		@"IDEFoundation.framework",
 		@"Xcode3Core.ideplugin",
 		@"IBAutolayoutFoundation.framework",
 		@"IDEKit.framework",
-		@"DebugHierarchyFoundation.framework",
 		@"DebugHierarchyKit.framework",
-		
-//		@"DevToolsCore.framework"
 	];
 	
 	LoadXcodeFrameworks(XcodeBundle(), frameworksToLoad);
-	NSLog(@"loaded frameworks: %@", [NSDate date]);
+	NSLog(@"loaded frameworks");
 	InitializeXcodeFrameworks();
-	NSLog(@"initialized frameworks: %@", [NSDate date]);
+	NSLog(@"initialized frameworks");
 	
 	BOOL isSafe = YES;
 	NSArray *protocols = @[@protocol(PBXProject)];
@@ -215,8 +212,7 @@ static void InitializeXcodeFrameworks(void)
 			ddfprintf(stderr, @"%@\n%@\n", [classError localizedDescription], [classError userInfo]);
 		}
 	}
-	NSLog(@"protocols: %@", [NSDate date]);
-	
+
 	if (!isSafe)
 		exit(EX_SOFTWARE);
 	
@@ -260,28 +256,10 @@ static void InitializeXcodeFrameworks(void)
 		@throw [DDCliParseException parseExceptionWithReason:[NSString stringWithFormat:@"The '%@' project is corrupted.", projectName] exitCode:EX_DATAERR];
 }
 
-- (void) setHelp:(NSNumber *)help
-{
-	if ([help boolValue])
-		[self printUsage:EX_OK];
-}
-
-- (void) setVersion:(NSNumber *)version
-{
-	if ([version boolValue])
-	{
-		ddprintf(@"%@\n", [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"]);
-		exit(EX_OK);
-	}
-}
-
 // MARK: - App run
 
 - (int) application:(DDCliApplication *)app runWithArguments:(NSArray *)arguments
 {
-	if ([arguments count] < 1)
-		[self printUsage:EX_USAGE];
-	
 	[self.class initializeXcproj];
 	
 	NSString *currentDirectoryPath = [[NSFileManager defaultManager] currentDirectoryPath];
@@ -302,70 +280,19 @@ static void InitializeXcodeFrameworks(void)
 			}
 		}
 	}
+
+	NSLog(@"project loaded");
 	
 	if (!_project)
 	{
 		ddfprintf(stderr, @"%@: The directory %@ does not contain an Xcode project.\n", app, currentDirectoryPath);
 		return EX_USAGE;
 	}
-	
-	NSString *action = [arguments objectAtIndex:0];
-	if (![[self allowedActions] containsObject:action])
-		[self printUsage:EX_USAGE];
-	
-	NSArray *actionArguments = nil;
-	if ([arguments count] >= 2)
-		actionArguments = [arguments subarrayWithRange:NSMakeRange(1, [arguments count] - 1)];
-	else
-		actionArguments = @[];
-	
-	NSArray *actionParts = [[action componentsSeparatedByString:@"-"] valueForKeyPath:@"capitalizedString"];
-	NSMutableString *selectorString = [NSMutableString stringWithString:[actionParts componentsJoinedByString:@""]];
-	[selectorString replaceCharactersInRange:NSMakeRange(0, 1) withString:[[selectorString substringToIndex:1] lowercaseString]];
-	[selectorString appendString:@":"];
-	SEL actionSelector = NSSelectorFromString(selectorString);
-	return [[self performSelector:actionSelector withObject:actionArguments] intValue];
+
+	return [[self writeProject] intValue];
 }
 
 // MARK: - Actions
-
-- (NSArray *) allowedActions
-{
-	return @[ @"list-targets",
-	          @"list-headers",
-	          @"read-build-setting",
-	          @"write-build-setting",
-	          @"add-xcconfig",
-	          @"add-resources-bundle",
-	          @"touch" ];
-}
-
-- (void) printUsage:(int)exitCode
-{
-	ddprintf(@"Usage: %@ [options] <action> [arguments]\n", [[NSBundle mainBundle] objectForInfoDictionaryKey:(id)kCFBundleExecutableKey]);
-	ddprintf(@"\nOptions:\n"
-	         @" -h, --help              Show this help text and exit\n"
-	         @" -V, --version           Show program version and exit\n"
-	         @" -p, --project           Path to an Xcode project (*.xcodeproj file). If not specified, the project in the current working directory is used\n"
-	         @" -t, --target            Name of the target. If not specified, the action is performed at the project level. Required for the `list-headers` and `add-resources-bundle` actions\n"
-	         @" -c, --configuration     Name of the configuration. If not specified, the default configuration (i.e. for command-line builds) is used\n"
-	         @"\nActions:\n"
-	         @" * list-targets\n"
-	         @"     List all the targets in the project\n\n"
-	         @" * list-headers [All|Public|Project|Private] (default=Public)\n"
-	         @"     List headers from the `Copy Headers` build phase\n\n"
-	         @" * read-build-setting <build_setting>\n"
-	         @"     Evaluate a build setting and print its value. If the build setting does not exist, nothing is printed\n\n"
-	         @" * write-build-setting <build_setting> <value>\n"
-	         @"     Assign a value to a build setting. If the build setting does not exist, it is added to the target\n\n"
-	         @" * add-xcconfig <xcconfig_path>\n"
-	         @"     Add an xcconfig file to the project and base all configurations on it\n\n"
-	         @" * add-resources-bundle <bundle_path>\n"
-	         @"     Add a bundle to the project and in the `Copy Bundle Resources` build phase\n\n"
-	         @" * touch\n"
-	         @"     Rewrite the project file\n");
-	exit(exitCode);
-}
 
 - (NSNumber *) writeProject
 {
@@ -376,14 +303,6 @@ static void InitializeXcodeFrameworks(void)
 		return @(EX_IOERR);
 	}
 	return @(EX_OK);
-}
-
-- (NSNumber *) touch:(NSArray *)arguments
-{
-	NSLog(@"before write: %@", [NSDate date]);
-	id res = [self writeProject];
-	NSLog(@"after write: %@", [NSDate date]);
-	return res;
 }
 
 @end

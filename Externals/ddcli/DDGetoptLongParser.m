@@ -211,7 +211,7 @@ dd_getopt_long_only(int nargc, char * const *nargv, const char *options,
 	optreset = 1;
 	opterr = 1;
 	optind = 1;
-    while ((ch = _getoptFunction(argc, argv, optionString, options, &longOptionIndex)) != -1)
+    while ((ch = _getoptFunction((int)argc, argv, optionString, options, &longOptionIndex)) != -1)
     {
         NSString * last_argv = [NSString stringWithUTF8String: argv[optind-1]];
         if (ch == ':')
