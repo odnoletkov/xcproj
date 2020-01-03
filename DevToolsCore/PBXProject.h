@@ -1,7 +1,3 @@
-@protocol PBXProject <NSObject>
-
-@end
-
 @protocol PRIVATE
 + (void)removeContainerForResolvedAbsolutePath:(NSString *)idd;
 @end

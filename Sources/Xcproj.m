@@ -13,10 +13,6 @@
 
 @implementation Xcproj
 
-static Class PBXProject = Nil;
-
-+ (void) setPBXProject:(Class)class                { PBXProject = class; }
-
 + (void) initializeXcproj
 {
 	NSLog(@"started");
@@ -37,7 +33,7 @@ static Class PBXProject = Nil;
 - (void) application:(DDCliApplication *)app willParseOptions:(DDGetoptLongParser *)optionsParser {
 }
 
-- (id <PBXProject>) setProject:(NSString *)projectName
+- (void) setProject:(NSString *)projectName
 {
 	if (![projectName.lastPathComponent isEqualToString:@"project.pbxproj"]) {
 		projectName = [projectName stringByAppendingPathComponent:@"project.pbxproj"];
@@ -68,9 +64,7 @@ static Class PBXProject = Nil;
 	NSParameterAssert(data2);
 	NSParameterAssert([data2 writeToFile:projectName options:0 error:nil]);
 
-	[PBXProject removeContainerForResolvedAbsolutePath:url];
-
-	return project;
+	[NSClassFromString(@"PBXProject") removeContainerForResolvedAbsolutePath:url];
 }
 
 // MARK: - App run
@@ -79,34 +73,16 @@ static Class PBXProject = Nil;
 {
 	[self.class initializeXcproj];
 
-	NSMutableArray<id<PBXProject>> *projects = [@[] mutableCopy];
+	if ([arguments count] == 0) {
+		arguments = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[[NSFileManager defaultManager] currentDirectoryPath]
+																		error:nil];
+		arguments = [arguments filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"self ENDSWITH '.xcodeproj'"]];
+		NSAssert([arguments count] != 0, @"xcodeproj file not found in the current directory");
+		NSAssert([arguments count] == 1, @"multiple xcodeproject files found in the directory");
+	}
 
 	for (NSString *path in arguments) {
-		[projects addObject:[self setProject:path]];
-	}
-
-	NSString *currentDirectoryPath = [[NSFileManager defaultManager] currentDirectoryPath];
-
-	if ([projects count] == 0) {
-		for (NSString *fileName in [[NSFileManager defaultManager] contentsOfDirectoryAtPath:currentDirectoryPath error:NULL]) {
-			if ([[fileName pathExtension] isEqualToString:@"xcodeproj"])
-			{
-				if ([projects count] == 0) {
-					[projects addObject:[self setProject:fileName]];
-				} else {
-					ddfprintf(stderr, @"%@: The directory %@ contains more than one Xcode project. You will need to specify the project with the --project option.\n", app, currentDirectoryPath);
-					return EX_USAGE;
-				}
-			}
-		}
-	}
-
-	NSLog(@"projects loaded");
-	
-	if ([projects count] == 0)
-	{
-		ddfprintf(stderr, @"%@: The directory %@ does not contain an Xcode project.\n", app, currentDirectoryPath);
-		return EX_USAGE;
+		[self setProject:path];
 	}
 
 	return EX_OK;
