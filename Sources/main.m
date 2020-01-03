@@ -57,8 +57,10 @@ int main(int argc, char *const *argv) { @autoreleasepool {
 		__auto_type obj = [NSDictionary plistWithDescriptionData:dataIn error:nil];
 		NSCParameterAssert(obj);
 
+		__auto_type projectPath = [NSProcessInfo processInfo].environment[@"XCODEPROJ"] ?: path.stringByDeletingLastPathComponent;
+
 		__auto_type contextInfo = @{
-			@"path": [NSURL fileURLWithPath:path].URLByDeletingLastPathComponent.absoluteURL.path,
+			@"path": [NSURL fileURLWithPath:projectPath].absoluteURL.path,
 			@"read-only": @0,
 			@"upgrade-log": [NSClassFromString(@"PBXLogOutputString") new],
 		};
