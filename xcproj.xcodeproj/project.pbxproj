@@ -313,6 +313,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Sources/xcproj_Prefix.pch;
 				INFOPLIST_FILE = Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "/Applications/Xcode.app/Contents/SharedFrameworks /Applications/Xcode.app/Contents/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = ch.pitaya.xcproj;
 				PRODUCT_NAME = xcproj;
 			};
@@ -330,6 +331,7 @@
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = Sources/xcproj_Prefix.pch;
 				INFOPLIST_FILE = Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "/Applications/Xcode.app/Contents/SharedFrameworks /Applications/Xcode.app/Contents/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = ch.pitaya.xcproj;
 				PRODUCT_NAME = xcproj;
 			};

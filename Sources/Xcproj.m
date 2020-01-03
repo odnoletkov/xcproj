@@ -12,126 +12,11 @@
 #import <objc/runtime.h>
 #import "XCDUndocumentedChecker.h"
 
-static NSString * const FrameworksToLoad = @"FrameworksToLoad";
-
 @implementation Xcproj
 
 static Class PBXProject = Nil;
 
 + (void) setPBXProject:(Class)class                { PBXProject = class; }
-
-static NSString *XcodeBundleIdentifier = @"com.apple.dt.Xcode";
-
-static NSBundle * XcodeBundleAtPath(NSString *path)
-{
-	NSBundle *xcodeBundle = [NSBundle bundleWithPath:path];
-	return [xcodeBundle.bundleIdentifier isEqualToString:XcodeBundleIdentifier] ? xcodeBundle : nil;
-}
-
-static NSBundle * XcodeBundle(void)
-{
-	NSString *xcodeAppPath = NSProcessInfo.processInfo.environment[@"XCPROJ_XCODE_APP_PATH"];
-	NSBundle *xcodeBundle = XcodeBundleAtPath(xcodeAppPath);
-	if (!xcodeBundle)
-	{
-		NSTask *task = [NSTask new];
-		task.launchPath = @"/usr/bin/xcode-select";
-		task.arguments = @[@"--print-path"];
-		task.standardOutput = [NSPipe new];
-		
-		@try
-		{
-			[task launch];
-			[task waitUntilExit];
-			
-			if (task.terminationStatus == 0)
-			{
-				NSData *outputData = [[task.standardOutput fileHandleForReading] readDataToEndOfFile];
-				NSString *outputString = [[NSString alloc] initWithData:outputData encoding:NSUTF8StringEncoding];
-				NSString *xcodePath = [[outputString stringByDeletingLastPathComponent] stringByDeletingLastPathComponent];
-				xcodeBundle = XcodeBundleAtPath(xcodePath);
-			}
-		}
-		@catch (NSException *exception)
-		{
-			NSURL *xcodeURL = [[NSWorkspace sharedWorkspace] URLForApplicationWithBundleIdentifier:XcodeBundleIdentifier];
-			xcodeBundle = XcodeBundleAtPath(xcodeURL.path);
-		}
-	}
-	
-	if (!xcodeBundle)
-	{
-		ddfprintf(stderr, @"Xcode.app not found.\n");
-		exit(EX_CONFIG);
-	}
-	
-	if (xcodeAppPath && ![[xcodeAppPath stringByResolvingSymlinksInPath] isEqualToString:xcodeBundle.bundlePath])
-	{
-		ddfprintf(stderr, @"WARNING: '%@' does not point to an Xcode app, using '%@'\n", xcodeAppPath, xcodeBundle.bundlePath);
-	}
-	
-	return xcodeBundle;
-}
-
-static NSString *DependentFramework(NSError *error)
-{
-	NSRegularExpression *notLoadedRegularExpression = [NSRegularExpression regularExpressionWithPattern:@"Library not loaded: @rpath/([^/]+)/" options:(NSRegularExpressionOptions)0 error:NULL];
-	
-	while (error)
-	{
-		NSString *debugDescription = error.userInfo[@"NSDebugDescription"];
-		if (debugDescription)
-		{
-			NSTextCheckingResult *match = [notLoadedRegularExpression firstMatchInString:debugDescription options:(NSMatchingOptions)0 range:NSMakeRange(0, debugDescription.length)];
-			if (match)
-			{
-				return [debugDescription substringWithRange:[match rangeAtIndex:1]];
-			}
-		}
-		error = error.userInfo[NSUnderlyingErrorKey];
-	}
-	return nil;
-}
-
-static void LoadXcodeFrameworks(NSBundle *xcodeBundle, NSArray *frameworks)
-{
-	NSURL *xcodeContentsURL = [[xcodeBundle privateFrameworksURL] URLByDeletingLastPathComponent];
-	for (NSString *framework in frameworks)
-	{
-		BOOL loaded = NO;
-		BOOL abort = NO;
-		NSArray *xcodeSubdirectories = [[NSFileManager defaultManager] contentsOfDirectoryAtURL:xcodeContentsURL includingPropertiesForKeys:nil options:0 error:NULL];
-		for (NSURL *frameworksDirectoryURL in xcodeSubdirectories)
-		{
-			NSURL *frameworkURL = [frameworksDirectoryURL URLByAppendingPathComponent:framework];
-			NSBundle *frameworkBundle = [NSBundle bundleWithURL:frameworkURL];
-			if (frameworkBundle)
-			{
-				NSError *loadError = nil;
-				loaded = [frameworkBundle loadAndReturnError:&loadError];
-				if (!loaded)
-				{
-					NSString *dependentFramework = DependentFramework(loadError);
-					if (dependentFramework)
-					{
-						LoadXcodeFrameworks(xcodeBundle, [@[ dependentFramework ] arrayByAddingObjectsFromArray:frameworks]);
-						abort = YES;
-					}
-					else
-					{
-						ddfprintf(stderr, @"The %@ %@ failed to load: %@\n", [framework stringByDeletingPathExtension], [framework pathExtension], loadError);
-						exit(EX_SOFTWARE);
-					}
-				}
-			}
-			
-			if (loaded || abort)
-				break;
-		}
-		if (abort)
-			break;
-	}
-}
 
 static void InitializeXcodeFrameworks(void)
 {
@@ -152,45 +37,21 @@ static void InitializeXcodeFrameworks(void)
 	// Xcode3Core.ideplugin`-[Xcode3CommandLineBuildTool run] calls IDEInitialize(1, &error)
 	NSError *error;
 	BOOL initialized = IDEInitialize(1, &error);
+	NSCParameterAssert(initialized);
 	fflush(stderr);
 	dup2(saved_stderr, STDERR_FILENO);
 	close(saved_stderr);
-	
-	if (!initialized)
-	{
-		NSString *dependentFramework = DependentFramework(error);
-		NSUserDefaults *standardUserDefaults = [NSUserDefaults standardUserDefaults];
-		NSArray *frameworksToLoad = [standardUserDefaults objectForKey:FrameworksToLoad];
-		if (dependentFramework && ![frameworksToLoad containsObject:dependentFramework])
-		{
-			[standardUserDefaults setObject:[frameworksToLoad arrayByAddingObject:dependentFramework] forKey:FrameworksToLoad];
-			ddfprintf(stderr, @"Please try to relaunch %@ (%@ was added to the list of frameworks to load)\n\n%@\n", NSProcessInfo.processInfo.processName, dependentFramework, error);
-		}
-		else
-		{
-			ddfprintf(stderr, @"IDEInitialize failed: %@\n", error);
-		}
-		exit(EX_SOFTWARE);
-	}
 }
 
 + (void) initializeXcproj
 {
-	static BOOL initialized = NO;
-	if (initialized)
-		return;
 	NSLog(@"started");
 	
-	NSArray *frameworksToLoad = @[
-		@"IDEFoundation.framework",
-		@"Xcode3Core.ideplugin",
-		@"IBAutolayoutFoundation.framework",
-		@"IDEKit.framework",
-		@"DebugHierarchyKit.framework",
-	];
-	
-	LoadXcodeFrameworks(XcodeBundle(), frameworksToLoad);
+	NSBundle *bundle = [NSBundle bundleWithPath:@"/Applications/Xcode.app/Contents/Frameworks/IDEFoundation.framework"];
+	NSParameterAssert(bundle && [bundle loadAndReturnError:nil]);
+
 	NSLog(@"loaded frameworks");
+
 	InitializeXcodeFrameworks();
 	NSLog(@"initialized frameworks");
 	
@@ -212,8 +73,6 @@ static void InitializeXcodeFrameworks(void)
 
 	if (!isSafe)
 		exit(EX_SOFTWARE);
-	
-	initialized = YES;
 }
 
 // MARK: - Options
