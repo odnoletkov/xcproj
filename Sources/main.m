@@ -27,8 +27,7 @@ int main(int argc, char *const *argv) { @autoreleasepool {
 	__auto_type arguments = [NSProcessInfo processInfo].arguments;
 	arguments = [arguments subarrayWithRange:NSMakeRange(1, [arguments count] - 1)];
 
-	__auto_type bundle = [NSBundle bundleWithPath:@"/Applications/Xcode.app/Contents/Frameworks/IDEFoundation.framework"];
-	NSCParameterAssert(bundle && [bundle loadAndReturnError:nil]);
+	NSCAssert(dlopen("IDEFoundation.framework/IDEFoundation", RTLD_NOW), @"%s", dlerror());
 
 	BOOL(*IDEInitialize)(int initializationOptions, NSError **error) = dlsym(RTLD_DEFAULT, "IDEInitialize");
 	NSCParameterAssert(IDEInitialize(1, nil));
