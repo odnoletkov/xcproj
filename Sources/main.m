@@ -24,6 +24,32 @@
 
 int main(int argc, char *const *argv) { @autoreleasepool {
 
+	if (!getenv("D0NE")) {
+		setenv("D0NE", "", 1);
+
+		__auto_type contentsPath = [({
+			NSTask *task = [NSTask new];
+			task.launchPath = @"/usr/bin/xcode-select";
+			task.arguments = @[@"--print-path"];
+			task.standardOutput = [NSPipe new];
+			[task launch];
+			[task waitUntilExit];
+			NSCParameterAssert(task.terminationStatus == 0);
+			[[NSString alloc] initWithData:[[task.standardOutput fileHandleForReading] readDataToEndOfFile]
+								  encoding:NSUTF8StringEncoding];
+		}) stringByDeletingLastPathComponent];
+		NSCParameterAssert(contentsPath);
+
+		setenv("DYLD_FRAMEWORK_PATH",
+			   [[@[
+				   [contentsPath stringByAppendingPathComponent:@"Frameworks"],
+				   [contentsPath stringByAppendingPathComponent:@"SharedFrameworks"],
+			   ] componentsJoinedByString:@":"] cStringUsingEncoding:NSUTF8StringEncoding],
+			   1);
+
+		NSCParameterAssert(execvp(argv[0], argv) != -1);
+	}
+
 	__auto_type arguments = [NSProcessInfo processInfo].arguments;
 	arguments = [arguments subarrayWithRange:NSMakeRange(1, [arguments count] - 1)];
 
