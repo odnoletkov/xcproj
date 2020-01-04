@@ -9,6 +9,7 @@
 
 @protocol PBXPListUnarchiver <NSObject>
 - (id)initWithPListArchive:(NSDictionary *)archive userSettings:(id)settings contextInfo:(NSDictionary *)contextInfo;
+- (void)setDelegate:(id)delegate;
 - (id)decodeRootObject;
 @end
 
@@ -60,6 +61,7 @@ int main(int argc, char *const *argv) { @autoreleasepool {
 		};
 		id<PBXPListUnarchiver> archiver = [[NSClassFromString(@"PBXPListUnarchiver") alloc] initWithPListArchive:obj userSettings:nil contextInfo:contextInfo];
 		NSCParameterAssert(archiver);
+		[archiver setDelegate:NSClassFromString(@"PBXProject")];
 		id project = [archiver decodeRootObject];
 		NSCParameterAssert(project);
 
