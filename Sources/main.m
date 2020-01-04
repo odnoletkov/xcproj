@@ -41,14 +41,14 @@ int main(int argc, char *const *argv) { @autoreleasepool {
 	if ([arguments count] == 0) {
 		arguments = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[[NSFileManager defaultManager] currentDirectoryPath]
 																		error:nil];
-		arguments = [arguments filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"self ENDSWITH '.xcodeproj'"]];
+		arguments = [arguments filteredArrayUsingPredicate:[NSPredicate predicateWithFormat:@"self ENDSWITH 'xcodeproj'"]];
 		NSCAssert([arguments count] != 0, @"xcodeproj file not found in the current directory");
 		NSCAssert([arguments count] == 1, @"multiple xcodeproject files found in the directory");
 	}
 
 	for (NSString *arg in arguments) {
 		__auto_type path = arg;
-		if (![path.lastPathComponent isEqualToString:@"project.pbxproj"]) {
+		if ([path.lastPathComponent.pathExtension isEqualToString:@"xcodeproj"]) {
 			path = [path stringByAppendingPathComponent:@"project.pbxproj"];
 		}
 
