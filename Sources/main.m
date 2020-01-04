@@ -27,7 +27,7 @@ int main(int argc, char *const *argv) { @autoreleasepool {
 	if (!getenv("D0NE")) {
 		setenv("D0NE", "", 1);
 
-		__auto_type contentsPath = [({
+		NSString *contentsPath = [({
 			NSTask *task = [NSTask new];
 			task.launchPath = @"/usr/bin/xcode-select";
 			task.arguments = @[@"--print-path"];
@@ -50,7 +50,7 @@ int main(int argc, char *const *argv) { @autoreleasepool {
 		NSCParameterAssert(execvp(argv[0], argv) != -1);
 	}
 
-	__auto_type arguments = [NSProcessInfo processInfo].arguments;
+	NSArray *arguments = [NSProcessInfo processInfo].arguments;
 	arguments = [arguments subarrayWithRange:NSMakeRange(1, [arguments count] - 1)];
 
 	NSCAssert(dlopen("IDEFoundation.framework/IDEFoundation", RTLD_NOW), @"%s", dlerror());
@@ -67,19 +67,19 @@ int main(int argc, char *const *argv) { @autoreleasepool {
 	}
 
 	for (NSString *arg in arguments) {
-		__auto_type path = arg;
+		NSString *path = arg;
 		if ([path.lastPathComponent.pathExtension isEqualToString:@"xcodeproj"]) {
 			path = [path stringByAppendingPathComponent:@"project.pbxproj"];
 		}
 
-		__auto_type dataIn = [NSData dataWithContentsOfFile:path];
+		NSData *dataIn = [NSData dataWithContentsOfFile:path];
 		NSCParameterAssert(dataIn);
-		__auto_type obj = [NSDictionary plistWithDescriptionData:dataIn error:nil];
+		NSDictionary *obj = [NSDictionary plistWithDescriptionData:dataIn error:nil];
 		NSCParameterAssert(obj);
 
-		__auto_type projectPath = [NSProcessInfo processInfo].environment[@"XCODEPROJ"] ?: path.stringByDeletingLastPathComponent;
+		NSString *projectPath = [NSProcessInfo processInfo].environment[@"XCODEPROJ"] ?: path.stringByDeletingLastPathComponent;
 
-		__auto_type contextInfo = @{
+		NSDictionary *contextInfo = @{
 			@"path": [NSURL fileURLWithPath:projectPath].absoluteURL.path,
 			@"read-only": @0,
 			@"upgrade-log": [NSClassFromString(@"PBXLogOutputString") new],
