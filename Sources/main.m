@@ -23,20 +23,14 @@
 
 int main(int argc, char *const *argv) { @autoreleasepool {
 
-	NSLog(@"started");
-
 	__auto_type arguments = [NSProcessInfo processInfo].arguments;
 	arguments = [arguments subarrayWithRange:NSMakeRange(1, [arguments count] - 1)];
 
 	__auto_type bundle = [NSBundle bundleWithPath:@"/Applications/Xcode.app/Contents/Frameworks/IDEFoundation.framework"];
 	NSCParameterAssert(bundle && [bundle loadAndReturnError:nil]);
 
-	NSLog(@"loaded frameworks");
-
 	BOOL(*IDEInitialize)(int initializationOptions, NSError **error) = dlsym(RTLD_DEFAULT, "IDEInitialize");
 	NSCParameterAssert(IDEInitialize(1, nil));
-
-	NSLog(@"initialized frameworks");
 
 	if ([arguments count] == 0) {
 		arguments = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[[NSFileManager defaultManager] currentDirectoryPath]
@@ -69,14 +63,10 @@ int main(int argc, char *const *argv) { @autoreleasepool {
 		id project = [archiver decodeRootObject];
 		NSCParameterAssert(project);
 
-		NSLog(@"read %@", path);
-
 		id unarchiver = [[NSClassFromString(@"PBXPListArchiver") alloc] initWithRootObject:project delegate:project];
 		NSCParameterAssert(unarchiver);
 		NSData *dataOut = [[unarchiver plistArchive] plistDescriptionUTF8Data];
 		NSCParameterAssert(dataOut && [dataOut writeToFile:path options:0 error:nil]);
-
-		NSLog(@"wrote %@", path);
 
 		[NSClassFromString(@"PBXProject") removeContainerForResolvedAbsolutePath:contextInfo[@"path"]];
 	}
