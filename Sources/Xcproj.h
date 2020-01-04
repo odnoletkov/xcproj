@@ -8,8 +8,6 @@
 
 #import "DDCommandLineInterface.h"
 
-#import "PBXProject.h"
-
 @interface Xcproj : NSObject <DDCliApplicationDelegate>
 
 @end

@@ -1,23 +1,70 @@
-//
-//  Xcproj.m
-//  xcproj
-//
-//  Created by Cédric Luthi on 07.02.11.
-//  Copyright Cédric Luthi 2011. All rights reserved.
-//
-
 #import "Xcproj.h"
 
 #import <dlfcn.h>
-#import <objc/runtime.h>
+
+@interface NSDictionary (PRIVATE)
++ (NSDictionary *)plistWithDescriptionData:(NSData *)data error:(NSError **)error;
+- (id)plistDescriptionUTF8Data;
+@end
+
+@protocol PBXPListUnarchiver <NSObject>
+- (id)initWithPListArchive:(NSDictionary *)archive userSettings:(id)settings contextInfo:(NSDictionary *)contextInfo;
+- (id)decodeRootObject;
+@end
+
+@protocol PBXPListArchiver
+- (id)initWithRootObject:(id)arg1 delegate:(id)arg2;
+- (id)plistArchive;
+@end
+
+@protocol PBXProject
++ (void)removeContainerForResolvedAbsolutePath:(NSString *)idd;
+@end
 
 @implementation Xcproj
 
-+ (void) initializeXcproj
-{
+- (void) application:(DDCliApplication *)app willParseOptions:(DDGetoptLongParser *)optionsParser {
+}
+
+- (void)processPath:(NSString *)path {
+	if (![path.lastPathComponent isEqualToString:@"project.pbxproj"]) {
+		path = [path stringByAppendingPathComponent:@"project.pbxproj"];
+	}
+
+	__auto_type dataIn = [NSData dataWithContentsOfFile:path];
+	NSParameterAssert(dataIn);
+	__auto_type obj = [NSDictionary plistWithDescriptionData:dataIn error:nil];
+	NSParameterAssert(obj);
+
+	__auto_type contextInfo = @{
+		@"path": [NSURL fileURLWithPath:path].URLByDeletingLastPathComponent.absoluteURL.path,
+		@"read-only": @0,
+		@"upgrade-log": [NSClassFromString(@"PBXLogOutputString") new],
+	};
+	id<PBXPListUnarchiver> archiver = [[NSClassFromString(@"PBXPListUnarchiver") alloc] initWithPListArchive:obj userSettings:nil contextInfo:contextInfo];
+	NSParameterAssert(archiver);
+	id project = [archiver decodeRootObject];
+	NSParameterAssert(project);
+
+	NSLog(@"read %@", path);
+
+	id unarchiver = [[NSClassFromString(@"PBXPListArchiver") alloc] initWithRootObject:project delegate:project];
+	NSParameterAssert(unarchiver);
+	NSData *dataOut = [[unarchiver plistArchive] plistDescriptionUTF8Data];
+	NSParameterAssert(dataOut && [dataOut writeToFile:path options:0 error:nil]);
+
+	NSLog(@"wrote %@", path);
+
+	[NSClassFromString(@"PBXProject") removeContainerForResolvedAbsolutePath:contextInfo[@"path"]];
+}
+
+// MARK: - App run
+
+- (int) application:(DDCliApplication *)app runWithArguments:(NSArray *)arguments {
+
 	NSLog(@"started");
-	
-	NSBundle *bundle = [NSBundle bundleWithPath:@"/Applications/Xcode.app/Contents/Frameworks/IDEFoundation.framework"];
+
+	__auto_type bundle = [NSBundle bundleWithPath:@"/Applications/Xcode.app/Contents/Frameworks/IDEFoundation.framework"];
 	NSParameterAssert(bundle && [bundle loadAndReturnError:nil]);
 
 	NSLog(@"loaded frameworks");
@@ -26,52 +73,6 @@
 	NSCParameterAssert(IDEInitialize(1, nil));
 
 	NSLog(@"initialized frameworks");
-}
-
-// MARK: - Options
-
-- (void) application:(DDCliApplication *)app willParseOptions:(DDGetoptLongParser *)optionsParser {
-}
-
-- (void) setProject:(NSString *)projectName
-{
-	if (![projectName.lastPathComponent isEqualToString:@"project.pbxproj"]) {
-		projectName = [projectName stringByAppendingPathComponent:@"project.pbxproj"];
-	}
-
-	NSLog(@"%@", projectName);
-	NSData *data = [NSData dataWithContentsOfFile:projectName];
-	NSError *error = nil;
-//	id obj = [NSPropertyListSerialization propertyListWithData:data options:0 format:nil error:&error];
-	id obj = [NSDictionary plistWithDescriptionData:data error:&error];
-	if (obj == nil && error) {
-		NSLog(@"%@", error);
-	}
-
-	id test = [projectName.pathComponents mutableCopy];
-	id url = [NSURL fileURLWithPathComponents:test].URLByDeletingLastPathComponent.absoluteURL.path;
-
-	id contextInfo = @{
-		@"path": url,
-		@"read-only": @0,
-		@"upgrade-log": [NSClassFromString(@"PBXLogOutputString") new],
-	};
-	id<PBXPListUnarchiver> arch = [[NSClassFromString(@"PBXPListUnarchiver") alloc] initWithPListArchive:obj userSettings:nil contextInfo:contextInfo];
-	id project = [arch decodeRootObject];
-
-	id archiver = [[NSClassFromString(@"PBXPListArchiver") alloc] initWithRootObject:project delegate:project];
-	NSData *data2 = [[archiver plistArchive] plistDescriptionUTF8Data];
-	NSParameterAssert(data2);
-	NSParameterAssert([data2 writeToFile:projectName options:0 error:nil]);
-
-	[NSClassFromString(@"PBXProject") removeContainerForResolvedAbsolutePath:url];
-}
-
-// MARK: - App run
-
-- (int) application:(DDCliApplication *)app runWithArguments:(NSArray *)arguments
-{
-	[self.class initializeXcproj];
 
 	if ([arguments count] == 0) {
 		arguments = [[NSFileManager defaultManager] contentsOfDirectoryAtPath:[[NSFileManager defaultManager] currentDirectoryPath]
@@ -82,7 +83,7 @@
 	}
 
 	for (NSString *path in arguments) {
-		[self setProject:path];
+		[self processPath:path];
 	}
 
 	return EX_OK;

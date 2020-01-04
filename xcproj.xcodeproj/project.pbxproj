@@ -50,7 +50,6 @@
 		C2CDDAD719E1D89E00DD1CBA /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		DA1DC00E10E59AED005A103B /* Xcproj.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; lineEnding = 0; name = Xcproj.m; path = Sources/Xcproj.m; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.objc; };
 		DA1DC00F10E59AED005A103B /* Xcproj.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Xcproj.h; path = Sources/Xcproj.h; sourceTree = "<group>"; };
-		DA8C9FFD1302AF93008B3560 /* PBXProject.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PBXProject.h; sourceTree = "<group>"; };
 		DAFF2AD913055EF500584E0E /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -78,7 +77,6 @@
 			isa = PBXGroup;
 			children = (
 				DAFF2AD913055EF500584E0E /* Info.plist */,
-				DA8C9FFB1302AF93008B3560 /* DevToolsCore */,
 				C269E98117B3DCCC0099A0C5 /* Externals */,
 				08FB7795FE84155DC02AAC07 /* Sources */,
 				C235E54C1CB5BB4300AF2744 /* Tests */,
@@ -150,14 +148,6 @@
 				C269E98C17B3DCCC0099A0C5 /* DDGetoptLongParser.m */,
 			);
 			path = ddcli;
-			sourceTree = "<group>";
-		};
-		DA8C9FFB1302AF93008B3560 /* DevToolsCore */ = {
-			isa = PBXGroup;
-			children = (
-				DA8C9FFD1302AF93008B3560 /* PBXProject.h */,
-			);
-			path = DevToolsCore;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
