@@ -82,7 +82,7 @@ int main(int argc, char *const *argv) { @autoreleasepool {
 
 		NSString *projectPath =
 		[NSProcessInfo processInfo].environment[@"XCODEPROJ"]
-		?: path.stringByDeletingLastPathComponent;
+		?: [NSURL fileURLWithPath:path].absoluteURL.URLByDeletingLastPathComponent.path;
 
 		NSDictionary *contextInfo = @{
 			@"path": [NSURL fileURLWithPath:projectPath].absoluteURL.path,
