@@ -75,8 +75,9 @@ int main(int argc, char *const *argv) { @autoreleasepool {
 			path = [path stringByAppendingPathComponent:@"project.pbxproj"];
 		}
 
-		NSData *dataIn = [NSData dataWithContentsOfFile:path];
-		NSCParameterAssert(dataIn);
+		NSError *error = nil;
+		NSData *dataIn = [NSData dataWithContentsOfFile:path options:0 error:&error];
+		NSCAssert(dataIn && error == nil, [error description]);
 		NSDictionary *obj = [NSDictionary plistWithDescriptionData:dataIn error:nil];
 		NSCParameterAssert(obj);
 
