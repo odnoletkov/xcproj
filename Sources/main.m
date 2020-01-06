@@ -27,24 +27,17 @@ int main(int argc, char *const *argv) { @autoreleasepool {
 	if (!getenv("D0NE")) {
 		setenv("D0NE", "", 1);
 
-		NSString *contentsPath = [({
-			NSTask *task = [NSTask new];
-			task.launchPath = @"/usr/bin/xcode-select";
-			task.arguments = @[@"--print-path"];
-			task.standardOutput = [NSPipe new];
-			[task launch];
-			[task waitUntilExit];
-			NSCParameterAssert(task.terminationStatus == 0);
-			[[NSString alloc] initWithData:[[task.standardOutput fileHandleForReading] readDataToEndOfFile]
-								  encoding:NSUTF8StringEncoding];
-		}) stringByDeletingLastPathComponent];
-		NSCParameterAssert(contentsPath);
+		NSString *xcodePath =
+		[[NSString alloc] initWithData:
+		 [[[NSFileHandle alloc] initWithFileDescriptor:fileno(popen("/usr/bin/xcode-select --print-path", "r"))
+										closeOnDealloc:YES] readDataToEndOfFile]
+							  encoding:NSUTF8StringEncoding];
+		NSCParameterAssert([xcodePath length] > 0);
 
 		setenv("DYLD_FRAMEWORK_PATH",
-			   [[@[
-				   [contentsPath stringByAppendingPathComponent:@"Frameworks"],
-				   [contentsPath stringByAppendingPathComponent:@"SharedFrameworks"],
-			   ] componentsJoinedByString:@":"] cStringUsingEncoding:NSUTF8StringEncoding],
+			   [[NSString stringWithFormat:@"%1$@/Frameworks:%1$@/SharedFrameworks",
+				 xcodePath.stringByDeletingLastPathComponent]
+				cStringUsingEncoding:NSUTF8StringEncoding],
 			   1);
 
 		NSCParameterAssert(execvp(argv[0], argv) != -1);
