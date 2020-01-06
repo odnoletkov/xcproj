@@ -66,7 +66,7 @@ int main(int argc, char *const *argv) { @autoreleasepool {
 		arguments = [arguments filteredArrayUsingPredicate:
 					 [NSPredicate predicateWithFormat:@"self ENDSWITH 'xcodeproj'"]];
 		NSCAssert([arguments count] != 0, @"xcodeproj file not found in the current directory");
-		NSCAssert([arguments count] == 1, @"multiple xcodeproject files found in the current directory");
+		NSCAssert([arguments count] == 1, @"multiple xcodeproj files found in the current directory");
 	}
 
 	for (NSString *arg in arguments) {
