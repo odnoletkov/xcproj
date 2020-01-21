@@ -75,7 +75,7 @@ int main(int argc, char *const *argv) { @autoreleasepool {
 		NSCParameterAssert(obj);
 
 		NSString *projectPath =
-		[NSProcessInfo processInfo].environment[@"XCODEPROJ"]
+		[NSProcessInfo processInfo].environment[@"XCODEPROJ_PATH"]
 		?: [NSURL fileURLWithPath:path].absoluteURL.URLByDeletingLastPathComponent.path;
 
 		NSDictionary *contextInfo = @{
