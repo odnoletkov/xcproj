@@ -14,7 +14,7 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "8DD76F960486AA7600D96B5E"
+               BlueprintIdentifier = "505BBC3723D7BB1000747F87"
                BuildableName = "xcodeproj-format"
                BlueprintName = "xcodeproj-format"
                ReferencedContainer = "container:xcodeproj-format.xcodeproj">
@@ -44,7 +44,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "8DD76F960486AA7600D96B5E"
+            BlueprintIdentifier = "505BBC3723D7BB1000747F87"
             BuildableName = "xcodeproj-format"
             BlueprintName = "xcodeproj-format"
             ReferencedContainer = "container:xcodeproj-format.xcodeproj">
@@ -61,7 +61,7 @@
          runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "8DD76F960486AA7600D96B5E"
+            BlueprintIdentifier = "505BBC3723D7BB1000747F87"
             BuildableName = "xcodeproj-format"
             BlueprintName = "xcodeproj-format"
             ReferencedContainer = "container:xcodeproj-format.xcodeproj">
