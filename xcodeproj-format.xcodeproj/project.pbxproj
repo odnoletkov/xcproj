@@ -13,7 +13,7 @@
 /* Begin PBXFileReference section */
 		044D019223C3FBAC00797AC3 /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		08FB779EFE84155DC02AAC07 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = /System/Library/Frameworks/Foundation.framework; sourceTree = "<absolute>"; };
-		8DD76FA10486AA7600D96B5E /* xcproj */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = xcproj; sourceTree = BUILT_PRODUCTS_DIR; };
+		8DD76FA10486AA7600D96B5E /* xcodeproj-format */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "xcodeproj-format"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -49,7 +49,7 @@
 		1AB674ADFE9D54B511CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				8DD76FA10486AA7600D96B5E /* xcproj */,
+				8DD76FA10486AA7600D96B5E /* xcodeproj-format */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -57,9 +57,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		8DD76F960486AA7600D96B5E /* xcproj */ = {
+		8DD76F960486AA7600D96B5E /* xcodeproj-format */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1DEB927408733DD40010E9CD /* Build configuration list for PBXNativeTarget "xcproj" */;
+			buildConfigurationList = 1DEB927408733DD40010E9CD /* Build configuration list for PBXNativeTarget "xcodeproj-format" */;
 			buildPhases = (
 				8DD76F990486AA7600D96B5E /* Sources */,
 				8DD76F9B0486AA7600D96B5E /* Frameworks */,
@@ -68,10 +68,10 @@
 			);
 			dependencies = (
 			);
-			name = xcproj;
+			name = "xcodeproj-format";
 			productInstallPath = "$(HOME)/bin";
 			productName = xcproj;
-			productReference = 8DD76FA10486AA7600D96B5E /* xcproj */;
+			productReference = 8DD76FA10486AA7600D96B5E /* xcodeproj-format */;
 			productType = "com.apple.product-type.tool";
 		};
 /* End PBXNativeTarget section */
@@ -82,7 +82,7 @@
 			attributes = {
 				LastUpgradeCheck = 1100;
 			};
-			buildConfigurationList = 1DEB927808733DD40010E9CD /* Build configuration list for PBXProject "xcproj" */;
+			buildConfigurationList = 1DEB927808733DD40010E9CD /* Build configuration list for PBXProject "xcodeproj-format" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = en;
 			hasScannedForEncodings = 1;
@@ -93,7 +93,7 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				8DD76F960486AA7600D96B5E /* xcproj */,
+				8DD76F960486AA7600D96B5E /* xcodeproj-format */,
 			);
 		};
 /* End PBXProject section */
@@ -116,7 +116,7 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ENABLE_OBJC_ARC = YES;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				PRODUCT_NAME = xcproj;
+				PRODUCT_NAME = "xcodeproj-format";
 			};
 			name = Debug;
 		};
@@ -125,7 +125,7 @@
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ENABLE_OBJC_ARC = YES;
-				PRODUCT_NAME = xcproj;
+				PRODUCT_NAME = "xcodeproj-format";
 			};
 			name = Release;
 		};
@@ -206,7 +206,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1DEB927408733DD40010E9CD /* Build configuration list for PBXNativeTarget "xcproj" */ = {
+		1DEB927408733DD40010E9CD /* Build configuration list for PBXNativeTarget "xcodeproj-format" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1DEB927508733DD40010E9CD /* Debug */,
@@ -215,7 +215,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		1DEB927808733DD40010E9CD /* Build configuration list for PBXProject "xcproj" */ = {
+		1DEB927808733DD40010E9CD /* Build configuration list for PBXProject "xcodeproj-format" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1DEB927908733DD40010E9CD /* Debug */,
